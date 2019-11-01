@@ -1,0 +1,18 @@
+textarea(
+  #code
+  cols='80',
+  rows='20',
+  (blur)='finishCodeTyping(code.value)'
+)
+br
+input(
+  #progInput,
+  (blur)='finishInputTyping(progInput.value)'
+)
+br
+button((click)='run()') Run
+span(*ngIf='isRunning$ | async') RUNNING
+br
+span Output
+br
+pre.output {{programOutput$ | async}}
