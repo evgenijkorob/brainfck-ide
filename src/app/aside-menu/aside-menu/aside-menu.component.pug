@@ -1,0 +1,10 @@
+.aside-menu__inner
+  a.aside-menu__link(
+    *ngFor='let item of (menuItems$ | async)',
+    [routerLink]='item.linkUrl',
+    [routerLinkActive]='"aside-menu__link_active"',
+    (click)='select(item.tag)'
+  )
+    app-icon(
+      [icon]='item.icon'
+    )
