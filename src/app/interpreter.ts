@@ -1,5 +1,16 @@
 export type TBfInterpreterMemory = Uint8Array | Uint16Array | Uint32Array;
 
+export interface BfInterpreterConfig {
+  memoryCellSize: 8 | 16 | 32;
+  memorySize: number;
+  code: string;
+  input: number[];
+}
+
+export type BfInterpreterOutputHandler = (charCode: number) => void;
+
+export type BfInterpreterStateHandler = (state: BfExecutionState) => void;
+
 export interface BfExecutionState {
   memory: TBfInterpreterMemory;
   memoryPointer: number;
@@ -25,6 +36,8 @@ const BfSyntaxDict = {
 
 export class BfInterpreter {
 
+  private code: string;
+  private input: number[];
   private memory: TBfInterpreterMemory;
   private memoryPointer = 0;
   private codePointer = 0;
@@ -32,12 +45,10 @@ export class BfInterpreter {
   private finished = false;
 
   constructor(
-    memoryCellSize: 8 | 16 | 32,
-    memorySize: number,
-    private code: string,
-    private input: number[],
-    private output: (charCode: number) => void
+    settings: BfInterpreterConfig,
+    private outputHandler: BfInterpreterOutputHandler
   ) {
+    const { memoryCellSize, memorySize, code, input } = settings;
     switch (memoryCellSize) {
       case 8:
         this.memory = new Uint8Array(memorySize);
@@ -49,19 +60,15 @@ export class BfInterpreter {
         this.memory = new Uint32Array(memorySize);
         break;
     }
-    this.input.reverse();
+    this.code = code;
+    this.input = input.reverse();
   }
 
-  next(
-    stateGetter?: (state: BfExecutionState) => void
-  ): boolean {
+  next(): BfExecutionState {
     if (!this.finished) {
       this.executeCommand();
     }
-    if (stateGetter) {
-      stateGetter(this.generateState());
-    }
-    return !this.finished;
+    return this.generateState();
   }
 
   private executeCommand(): void {
@@ -100,7 +107,7 @@ export class BfInterpreter {
         }
         break;
       case BfSyntaxDict.printCellValue:
-        this.output(this.memory[this.memoryPointer]);
+        this.outputHandler(this.memory[this.memoryPointer]);
         break;
       case BfSyntaxDict.inputCellValue:
         const charCode = this.input.length ? this.input.pop() : 0;

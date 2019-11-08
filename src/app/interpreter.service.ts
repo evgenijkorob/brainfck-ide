@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { BfExecutionState } from './interpreter';
+import { BfExecutionState, BfInterpreterConfig } from './interpreter';
 import { Store } from '@ngrx/store';
 import { AppState } from './app.state';
 import { receiveOutputCharCode } from './code-editor/code-editor.actions';
+import { InterpreterWorkerMessage } from './interpreter-worker';
 
 
 
@@ -15,47 +16,35 @@ export class InterpreterService {
   private runningProgram$: Subject<BfExecutionState>;
   private output$ = new Subject<number>();
 
-  constructor(private store$: Store<AppState>) {
-    this.worker.onmessage = this.handleWorkerMessage.bind(this);
+  constructor(private store: Store<AppState>) {
+    this.worker.onmessage = ({ data }) => this.handleWorkerMessage(data);
     this.worker.onerror = console.error;
   }
 
-  run(config: any): Subject<BfExecutionState> {
+  run(config: BfInterpreterConfig): Subject<BfExecutionState> {
     this.runningProgram$ = new Subject<BfExecutionState>();
-    this.postMessageToWorker('initiate-entity', config);
-    this.postMessageToWorker('run');
+    this.postMessageToWorker('run', config);
     return this.runningProgram$;
   }
 
-  private postMessageToWorker(command: string, payload?: any): void {
-    this.worker.postMessage({ command, payload });
+  private postMessageToWorker(message: string, payload?: any): void {
+    const messageObj: InterpreterWorkerMessage = { message, payload };
+    this.worker.postMessage(messageObj);
   }
 
-  private handleWorkerMessage({ data }): void {
-    switch (data.type) {
+  private handleWorkerMessage(data: InterpreterWorkerMessage): void {
+    switch (data.message) {
       case 'output':
-        this.output$.next(data.payload.charCode);
-
-
-
-
-        // TODO надо что-то сделать с этим
-
-
-
-        this.store$.dispatch(receiveOutputCharCode({ charCode: data.payload.charCode }));
+        this.output$.next(data.payload);
+        this.store.dispatch(receiveOutputCharCode({ charCode: data.payload }));
         break;
       case 'error':
-        console.error('[WORKER] ' + data.payload.err.message);
-        this.runningProgram$.error(data.payload.err);
+        console.error('[WORKER] ' + data.payload);
+        this.runningProgram$.error({ message: data.payload });
         break;
       case 'completed':
-        this.runningProgram$.next(data.payload.state);
+        this.runningProgram$.next(data.payload);
         this.runningProgram$.complete();
-        break;
-      default:
-        console.log('webworker message of unknown type');
-        console.dir(data);
         break;
     }
   }

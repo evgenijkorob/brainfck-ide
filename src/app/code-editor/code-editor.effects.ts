@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { InterpreterService } from '../interpreter.service';
 import { runProgram, completeProgram } from './code-editor.actions';
-import { tap, mergeMap, map, catchError, mergeAll } from 'rxjs/operators';
+import { map, catchError, mergeAll } from 'rxjs/operators';
 import { AppState } from '../app.state';
 import { Store, select } from '@ngrx/store';
 import { selectCodeEditorConfig } from './code-editor.reducer';
@@ -38,30 +38,11 @@ export class CodeEditorEffects {
           return completeProgram();
         }
       ),
-      catchError(() => {
+      catchError((err) => {
+        console.error(err.message);
         console.log('catched error, return empty');
         return EMPTY;
       })
     )
   );
-
-  // public runProgram$ = createEffect(
-  //   () => this.actions$.pipe(
-  //     ofType(runProgram.type),
-  //     mergeMap(
-  //       () => this.interpreter.run(this.config).pipe(
-  //         map(
-  //           executionState => {
-  //             console.dir(executionState);
-  //             return completeProgram();
-  //           }
-  //         ),
-  //         catchError(() => {
-  //           console.log('catched error, return empty');
-  //           return EMPTY;
-  //         })
-  //       )
-  //     )
-  //   )
-  // );
 }

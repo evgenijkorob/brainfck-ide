@@ -13,7 +13,7 @@ import { selectItem } from '../aside-menu.actions';
 })
 export class AsideMenuComponent implements OnInit {
 
-  private menuItems$: Observable<MenuItem[]>;
+  public menuItems$: Observable<MenuItem[]>;
 
   constructor(private store: Store<AppState>) { }
 

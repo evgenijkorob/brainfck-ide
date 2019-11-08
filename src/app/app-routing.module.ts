@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { EditorComponent } from './code-editor/editor/editor.component';
 
 
+
 const routes: Routes = [
   { path: 'editor', component: EditorComponent },
   { path: '', redirectTo: '/editor', pathMatch: 'full' },
