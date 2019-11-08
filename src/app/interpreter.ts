@@ -15,6 +15,7 @@ export interface BfExecutionState {
   memory: TBfInterpreterMemory;
   memoryPointer: number;
   codePointer: number;
+  paused: boolean;
   finished: boolean;
 }
 
@@ -36,14 +37,6 @@ const BfSyntaxDict = {
 
 export class BfInterpreter {
 
-  private code: string;
-  private input: number[];
-  private memory: TBfInterpreterMemory;
-  private memoryPointer = 0;
-  private codePointer = 0;
-  private loopsBeginningCodePointerStack: number[] = [];
-  private finished = false;
-
   constructor(
     settings: BfInterpreterConfig,
     private outputHandler: BfInterpreterOutputHandler
@@ -64,11 +57,41 @@ export class BfInterpreter {
     this.input = input.reverse();
   }
 
-  next(): BfExecutionState {
+  private get state(): BfExecutionState {
+    return {
+      memory: this.memory,
+      memoryPointer: this.memoryPointer,
+      codePointer: this.codePointer,
+      paused: this.paused,
+      finished: this.finished
+    };
+  }
+
+  private code: string;
+  private input: number[];
+  private memory: TBfInterpreterMemory;
+  private memoryPointer = 0;
+  private codePointer = 0;
+  private loopsBeginningCodePointerStack: number[] = [];
+  private paused = false;
+  private finished = false;
+
+  public next(breakpoints?: number[]): BfExecutionState {
     if (!this.finished) {
-      this.executeCommand();
+      if (this.paused) {
+        this.paused = false;
+        this.executeCommand();
+      } else if (this.achievedBreakpoint(breakpoints)) {
+        this.paused = true;
+      } else {
+        this.executeCommand();
+      }
     }
-    return this.generateState();
+    return this.state;
+  }
+
+  private achievedBreakpoint(breakpoints?: number[]): boolean {
+    return breakpoints && breakpoints.find((point) => point === this.codePointer) !== -1;
   }
 
   private executeCommand(): void {
@@ -121,11 +144,11 @@ export class BfInterpreter {
     }
   }
 
-  private findExitFromLoop(codeP: number): number {
+  private findExitFromLoop(codePointer: number): number {
     let unclosedBrackets = 1;
-    while ((unclosedBrackets !== 0) && (codeP < this.code.length - 1)) {
-      codeP += 1;
-      switch (this.code[codeP]) {
+    while ((unclosedBrackets !== 0) && (codePointer < this.code.length - 1)) {
+      codePointer += 1;
+      switch (this.code[codePointer]) {
         case BfSyntaxDict.startLoop:
           unclosedBrackets += 1;
           break;
@@ -134,24 +157,14 @@ export class BfInterpreter {
           break;
       }
     }
-    return codeP;
+    return codePointer;
   }
 
   private generateError(message: string): BfInterpreterError {
     this.finished = true;
     return {
       message,
-      state: this.generateState()
+      state: this.state
     };
-  }
-
-  private generateState(): BfExecutionState {
-    const state: BfExecutionState = {
-      memory: this.memory,
-      memoryPointer: this.memoryPointer,
-      codePointer: this.codePointer,
-      finished: this.finished
-    };
-    return state;
   }
 }

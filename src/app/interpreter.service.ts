@@ -23,8 +23,24 @@ export class InterpreterService {
 
   run(config: BfInterpreterConfig): Subject<BfExecutionState> {
     this.runningProgram$ = new Subject<BfExecutionState>();
-    this.postMessageToWorker('run', config);
+    this.postMessageToWorker('initialize', config);
+    this.postMessageToWorker('run');
     return this.runningProgram$;
+  }
+
+  debug(config: BfInterpreterConfig, breakpoints: number[]): Subject<BfExecutionState> {
+    this.runningProgram$ = new Subject<BfExecutionState>();
+    this.postMessageToWorker('initialize', config);
+    this.postMessageToWorker('debug', breakpoints);
+    return this.runningProgram$;
+  }
+
+  continue(breakpoints: number[]): void {
+    this.postMessageToWorker('continue', breakpoints);
+  }
+
+  step(): void {
+    this.postMessageToWorker('step');
   }
 
   private postMessageToWorker(message: string, payload?: any): void {
@@ -39,10 +55,10 @@ export class InterpreterService {
         this.store.dispatch(receiveOutputCharCode({ charCode: data.payload }));
         break;
       case 'error':
-        console.error('[WORKER] ' + data.payload);
         this.runningProgram$.error({ message: data.payload });
         break;
-      case 'completed':
+      case 'pause':
+      case 'complete':
         this.runningProgram$.next(data.payload);
         this.runningProgram$.complete();
         break;

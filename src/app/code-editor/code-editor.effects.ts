@@ -40,7 +40,6 @@ export class CodeEditorEffects {
       ),
       catchError((err) => {
         console.error(err.message);
-        console.log('catched error, return empty');
         return EMPTY;
       })
     )
