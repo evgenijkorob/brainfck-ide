@@ -4,7 +4,7 @@ import { BfExecutionState, BfInterpreterConfig } from './interpreter';
 import { Store } from '@ngrx/store';
 import { AppState } from './app.state';
 import { receiveOutputCharCode } from './code-editor/code-editor.actions';
-import { InterpreterWorkerMessage } from './interpreter-worker';
+import { InterpreterWorkerMessage } from './interpreter-worker-message';
 
 
 
@@ -21,25 +21,25 @@ export class InterpreterService {
     this.worker.onerror = console.error;
   }
 
-  run(config: BfInterpreterConfig): Subject<BfExecutionState> {
+  public run(config: BfInterpreterConfig): Subject<BfExecutionState> {
     this.runningProgram$ = new Subject<BfExecutionState>();
     this.postMessageToWorker('initialize', config);
     this.postMessageToWorker('run');
     return this.runningProgram$;
   }
 
-  debug(config: BfInterpreterConfig, breakpoints: number[]): Subject<BfExecutionState> {
+  public debug(config: BfInterpreterConfig, breakpoints: number[]): Subject<BfExecutionState> {
     this.runningProgram$ = new Subject<BfExecutionState>();
     this.postMessageToWorker('initialize', config);
     this.postMessageToWorker('debug', breakpoints);
     return this.runningProgram$;
   }
 
-  continue(breakpoints: number[]): void {
+  public continue(breakpoints: number[]): void {
     this.postMessageToWorker('continue', breakpoints);
   }
 
-  step(): void {
+  public step(): void {
     this.postMessageToWorker('step');
   }
 
@@ -58,6 +58,8 @@ export class InterpreterService {
         this.runningProgram$.error({ message: data.payload });
         break;
       case 'pause':
+        this.runningProgram$.next(data.payload);
+        break;
       case 'complete':
         this.runningProgram$.next(data.payload);
         this.runningProgram$.complete();

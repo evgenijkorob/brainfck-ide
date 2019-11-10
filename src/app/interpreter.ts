@@ -36,6 +36,14 @@ const BfSyntaxDict = {
 };
 
 export class BfInterpreter {
+  private code: string;
+  private input: number[];
+  private memory: TBfInterpreterMemory;
+  private memoryPointer = 0;
+  private codePointer = 0;
+  private loopsBeginningCodePointerStack: number[] = [];
+  private paused = false;
+  private finished = false;
 
   constructor(
     settings: BfInterpreterConfig,
@@ -57,25 +65,6 @@ export class BfInterpreter {
     this.input = input.reverse();
   }
 
-  private get state(): BfExecutionState {
-    return {
-      memory: this.memory,
-      memoryPointer: this.memoryPointer,
-      codePointer: this.codePointer,
-      paused: this.paused,
-      finished: this.finished
-    };
-  }
-
-  private code: string;
-  private input: number[];
-  private memory: TBfInterpreterMemory;
-  private memoryPointer = 0;
-  private codePointer = 0;
-  private loopsBeginningCodePointerStack: number[] = [];
-  private paused = false;
-  private finished = false;
-
   public next(breakpoints?: number[]): BfExecutionState {
     if (!this.finished) {
       if (this.paused) {
@@ -88,6 +77,16 @@ export class BfInterpreter {
       }
     }
     return this.state;
+  }
+
+  private get state(): BfExecutionState {
+    return {
+      memory: this.memory,
+      memoryPointer: this.memoryPointer,
+      codePointer: this.codePointer,
+      paused: this.paused,
+      finished: this.finished
+    };
   }
 
   private achievedBreakpoint(breakpoints?: number[]): boolean {

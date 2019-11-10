@@ -22,17 +22,6 @@ export class InterpreterController {
     this.initializeInterpreterEntity();
   }
 
-  private initializeInterpreterEntity(): void {
-    if (!this.config) {
-      throw new Error('The interpreter is not initialized');
-    }
-    if (this.isRunning) {
-      clearTimeout(this.executionTimer);
-      this.isRunning = false;
-    }
-    this.interpreter = new BfInterpreter(this.config, this.outputHandler);
-  }
-
   public runProgram(): void {
     this.initializeInterpreterEntity();
     this.executeInParts(false);
@@ -55,6 +44,17 @@ export class InterpreterController {
       state.paused = true;
     }
     this.stateHandler(state);
+  }
+
+  private initializeInterpreterEntity(): void {
+    if (!this.config) {
+      throw new Error('The interpreter is not initialized');
+    }
+    if (this.isRunning) {
+      clearTimeout(this.executionTimer);
+      this.isRunning = false;
+    }
+    this.interpreter = new BfInterpreter(this.config, this.outputHandler);
   }
 
   private executeInParts(debug: boolean): void {
