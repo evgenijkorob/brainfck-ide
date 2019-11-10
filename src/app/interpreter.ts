@@ -79,7 +79,7 @@ export class BfInterpreter {
     return this.state;
   }
 
-  private get state(): BfExecutionState {
+  public get state(): BfExecutionState {
     return {
       memory: this.memory,
       memoryPointer: this.memoryPointer,

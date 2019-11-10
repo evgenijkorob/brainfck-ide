@@ -41,6 +41,10 @@ class InterpreterWorker {
         case 'step':
           this.interpreterController.makeStep();
           break;
+        case 'stop':
+          this.interpreterController.stop();
+          this.postMessage('stopped');
+          break;
         default:
           throw new Error('Unknown command');
       }
@@ -49,7 +53,7 @@ class InterpreterWorker {
     }
   }
 
-  private postMessage(message: string, payload: any): void {
+  private postMessage(message: string, payload?: any): void {
     const messageObj: InterpreterWorkerMessage = { message, payload };
     postMessage(messageObj);
   }

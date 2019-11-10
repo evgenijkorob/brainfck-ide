@@ -34,11 +34,17 @@ export class InterpreterController {
   }
 
   public continueDebug(breakpointArray: number[]): void {
+    if (!this.isRunning) {
+      throw new Error('Program is not running');
+    }
     this.breakpoints = breakpointArray.slice().sort();
     this.executeInParts(true);
   }
 
   public makeStep(): void {
+    if (!this.isRunning) {
+      throw new Error('Program is not running');
+    }
     const state = this.interpreter.next();
     if (!state.finished) {
       state.paused = true;
@@ -46,14 +52,18 @@ export class InterpreterController {
     this.stateHandler(state);
   }
 
-  private initializeInterpreterEntity(): void {
-    if (!this.config) {
-      throw new Error('The interpreter is not initialized');
-    }
+  public stop(): void {
     if (this.isRunning) {
       clearTimeout(this.executionTimer);
       this.isRunning = false;
     }
+  }
+
+  private initializeInterpreterEntity(): void {
+    if (!this.config) {
+      throw new Error('The interpreter is not initialized');
+    }
+    this.stop();
     this.interpreter = new BfInterpreter(this.config, this.outputHandler);
   }
 

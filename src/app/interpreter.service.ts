@@ -43,6 +43,10 @@ export class InterpreterService {
     this.postMessageToWorker('step');
   }
 
+  public stop(): void {
+    this.postMessageToWorker('stop');
+  }
+
   private postMessageToWorker(message: string, payload?: any): void {
     const messageObj: InterpreterWorkerMessage = { message, payload };
     this.worker.postMessage(messageObj);
@@ -62,6 +66,9 @@ export class InterpreterService {
         break;
       case 'complete':
         this.runningProgram$.next(data.payload);
+        this.runningProgram$.complete();
+        break;
+      case 'stopped':
         this.runningProgram$.complete();
         break;
     }
