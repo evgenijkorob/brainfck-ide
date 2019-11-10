@@ -16,6 +16,8 @@ export const runProgram = createAction('[Code Editor] Run program');
 
 export const completeProgram = createAction('[Code Editor] Complete program');
 
+export const completeProgramWithError = createAction('[Code Editor] Complete with error');
+
 export const receiveOutputCharCode = createAction(
   '[Code Editor] Receive output char code',
   props<{charCode: number}>()

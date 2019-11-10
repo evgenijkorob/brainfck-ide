@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { InterpreterService } from '../interpreter.service';
-import { runProgram, completeProgram } from './code-editor.actions';
-import { map, catchError, mergeAll } from 'rxjs/operators';
+import { runProgram, completeProgram, completeProgramWithError } from './code-editor.actions';
+import { map, catchError, mergeAll, exhaustMap, exhaust } from 'rxjs/operators';
 import { AppState } from '../app.state';
 import { Store, select } from '@ngrx/store';
 import { selectCodeEditorConfig } from './code-editor.reducer';
-import { Subject, EMPTY } from 'rxjs';
-import { BfExecutionState } from '../interpreter';
+import { of } from 'rxjs';
 
 
 
@@ -15,7 +14,6 @@ import { BfExecutionState } from '../interpreter';
 export class CodeEditorEffects {
   private configSub;
   private config;
-  private programExecution$: Subject<BfExecutionState>;
 
   constructor(
     private store$: Store<AppState>,
@@ -31,17 +29,12 @@ export class CodeEditorEffects {
   public runProgram$ = createEffect(
     () => this.actions$.pipe(
       ofType(runProgram.type),
-      map(() => this.interpreter.run(this.config)),
-      mergeAll(),
-      map(
-        executionState => {
-          return completeProgram();
-        }
-      ),
-      catchError((err) => {
-        console.error(err.message);
-        return EMPTY;
-      })
+      exhaustMap(
+        action => this.interpreter.run(this.config).pipe(
+          map(executionState => completeProgram()),
+          catchError(err => of(completeProgramWithError()))
+        )
+      )
     )
   );
 }

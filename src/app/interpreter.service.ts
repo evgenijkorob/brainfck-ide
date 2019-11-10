@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, PartialObserver, Observable } from 'rxjs';
 import { BfExecutionState, BfInterpreterConfig } from './interpreter';
 import { Store } from '@ngrx/store';
 import { AppState } from './app.state';
-import { receiveOutputCharCode } from './code-editor/code-editor.actions';
 import { InterpreterWorkerMessage } from './interpreter-worker-message';
 
 
@@ -13,7 +12,7 @@ import { InterpreterWorkerMessage } from './interpreter-worker-message';
 })
 export class InterpreterService {
   private worker = new Worker('./interpreter.worker', { type: 'module' });
-  private runningProgram$: Subject<BfExecutionState>;
+  private programExecution$: Subject<BfExecutionState>;
   private output$ = new Subject<number>();
 
   constructor(private store: Store<AppState>) {
@@ -21,18 +20,22 @@ export class InterpreterService {
     this.worker.onerror = console.error;
   }
 
-  public run(config: BfInterpreterConfig): Subject<BfExecutionState> {
-    this.runningProgram$ = new Subject<BfExecutionState>();
-    this.postMessageToWorker('initialize', config);
-    this.postMessageToWorker('run');
-    return this.runningProgram$;
+  public subToOutput(observer: PartialObserver<number>): Subscription {
+    return this.output$.subscribe(observer);
   }
 
-  public debug(config: BfInterpreterConfig, breakpoints: number[]): Subject<BfExecutionState> {
-    this.runningProgram$ = new Subject<BfExecutionState>();
+  public run(config: BfInterpreterConfig): Observable<BfExecutionState> {
+    this.programExecution$ = new Subject<BfExecutionState>();
+    this.postMessageToWorker('initialize', config);
+    this.postMessageToWorker('run');
+    return this.programExecution$.asObservable();
+  }
+
+  public debug(config: BfInterpreterConfig, breakpoints: number[]): Observable<BfExecutionState> {
+    this.programExecution$ = new Subject<BfExecutionState>();
     this.postMessageToWorker('initialize', config);
     this.postMessageToWorker('debug', breakpoints);
-    return this.runningProgram$;
+    return this.programExecution$.asObservable();
   }
 
   public continue(breakpoints: number[]): void {
@@ -56,20 +59,19 @@ export class InterpreterService {
     switch (data.message) {
       case 'output':
         this.output$.next(data.payload);
-        this.store.dispatch(receiveOutputCharCode({ charCode: data.payload }));
         break;
       case 'error':
-        this.runningProgram$.error({ message: data.payload });
+        this.programExecution$.error({ message: data.payload });
         break;
       case 'pause':
-        this.runningProgram$.next(data.payload);
+        this.programExecution$.next(data.payload);
         break;
       case 'complete':
-        this.runningProgram$.next(data.payload);
-        this.runningProgram$.complete();
+        this.programExecution$.next(data.payload);
+        this.programExecution$.complete();
         break;
       case 'stopped':
-        this.runningProgram$.complete();
+        this.programExecution$.complete();
         break;
     }
   }
