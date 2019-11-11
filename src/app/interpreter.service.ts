@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, Subscription, PartialObserver, Observable } from 'rxjs';
 import { BfExecutionState, BfInterpreterConfig } from './interpreter';
-import { Store } from '@ngrx/store';
-import { AppState } from './app.state';
 import { InterpreterWorkerMessage } from './interpreter-worker-message';
 
 
@@ -15,7 +13,7 @@ export class InterpreterService {
   private programExecution$: Subject<BfExecutionState>;
   private output$ = new Subject<number>();
 
-  constructor(private store: Store<AppState>) {
+  constructor() {
     this.worker.onmessage = ({ data }) => this.handleWorkerMessage(data);
     this.worker.onerror = console.error;
   }
