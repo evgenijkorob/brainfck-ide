@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MenuItemTag, MenuItem } from '../aside-menu.model';
 import { Store, select } from '@ngrx/store';
-import { AppState } from 'src/app/app.state';
+import { AppState } from 'src/app/_model/state';
 import { Observable, Subscription } from 'rxjs';
 import { getMenuItems, getSelectedItemTag } from '../aside-menu.selectors';
 import { selectItem } from '../aside-menu.actions';

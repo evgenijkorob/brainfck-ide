@@ -1,5 +1,5 @@
 import { createSelector, createFeatureSelector } from '@ngrx/store';
-import { AppState } from '../app.state';
+import { AppState } from '../_model/state';
 import { AsideMenuState } from './aside-menu.model';
 import { asideMenuFeatureKey } from './aside-menu.reducer';
 
