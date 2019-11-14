@@ -1,15 +1,17 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { LoginPageComponent } from './login-page/login-page.component';
 
 
 
 const routes: Routes = [
-  { path: 'editor', loadChildren: () => import('./editor-page/editor-page.module').then(m => m.EditorPageModule) },
-  { path: '', redirectTo: '/editor', pathMatch: 'full' }
+  { path: 'login', component: LoginPageComponent },
+  { path: 'ide', loadChildren: () => import('./ide-page/ide-page.module').then(m => m.IdePageModule) },
+  { path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {enableTracing: false})],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

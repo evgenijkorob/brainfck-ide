@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 import { EffectsModule } from '@ngrx/effects';
 
 import { AppComponent } from './app.component';
-import { AsideMenuModule } from './aside-menu/aside-menu.module';
+import { LoginPageModule } from './login-page/login-page.module';
 
 
 
@@ -24,7 +24,7 @@ import { AsideMenuModule } from './aside-menu/aside-menu.module';
       logOnly: environment.production
     }),
     EffectsModule.forRoot([]),
-    AsideMenuModule
+    LoginPageModule
   ],
   bootstrap: [AppComponent]
 })
