@@ -1,45 +1,36 @@
 import { Injectable } from '@angular/core';
-import { Store, select } from '@ngrx/store';
+import { Store, select, createSelector } from '@ngrx/store';
 import { AppState } from '../state';
 import { InterpreterService } from 'src/app/interpreter.service';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { map, exhaustMap, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { startReleaseExecution, executionFinished, stopExecution } from './actions';
-import { getCode } from '../ide/selectors';
-import { BfInterpreterConfig } from 'src/app/interpreter-worker/interpreter';
+import { getCode, getInterpreterConfig } from '../ide/selectors';
+import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter-worker/interpreter';
+import { getInterpreterInput } from './selectors';
+
+
 
 @Injectable()
 export class ReleaseExecutionEffects {
-  private codeSub;
-  private config: BfInterpreterConfig;
-
   constructor(
     private store: Store<AppState>,
     private actions$: Actions,
     private interpreter: InterpreterService
   ) {
-    this.codeSub = this.store.pipe(select(getCode)).subscribe(
-      {
-        next: (code) => {
-          this.config = {
-            memoryCellSize: 8,
-            memorySize: 30000,
-            code,
-            input: []
-          };
-        }
-      }
-    );
-    this.interpreter.subToOutput({next: (charCode) => console.log(String.fromCharCode(charCode))});
+    this.interpreter.subToOutput({
+      next: charCode => console.log(String.fromCharCode(charCode))
+    });
   }
 
   public startReleaseExecution$ = createEffect(
     () => this.actions$.pipe(
       ofType(startReleaseExecution.type),
-      exhaustMap(
-        action => this.interpreter.run(this.config).pipe(
-          map(executionState => executionFinished())
+      mergeMap(
+        action => this.getConfigAndInitialData().pipe(
+          mergeMap(({ config, initialData }) => this.interpreter.run(config, initialData)),
+          map(executionState => executionFinished()),
         )
       )
     )
@@ -56,4 +47,17 @@ export class ReleaseExecutionEffects {
       )
     )
   );
+
+  private getConfigAndInitialData(): Observable<{ config: BfInterpreterConfig, initialData: BfInterpreterInitialData}> {
+    return this.store.pipe(
+      select(
+        createSelector(
+          getInterpreterConfig,
+          getInterpreterInput,
+          getCode,
+          (config, input, code) => ({ config, initialData: { code, input }})
+        )
+      )
+    );
+  }
 }
