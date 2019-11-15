@@ -12,7 +12,6 @@ import { EditorPageModule } from '../editor-page/editor-page.module';
   imports: [
     CommonModule,
     IdePageRoutingModule,
-    AsideMenuModule,
     EditorPageModule
   ],
   exports: [IdePageComponent]
