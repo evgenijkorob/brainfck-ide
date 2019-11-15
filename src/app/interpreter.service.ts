@@ -9,7 +9,7 @@ import { InterpreterWorkerMessage } from './interpreter-worker/interpreter-worke
   providedIn: 'root'
 })
 export class InterpreterService {
-  private worker = new Worker('./interpreter.worker', { type: 'module' });
+  private worker = new Worker('./interpreter-worker/interpreter.worker.ts', { type: 'module' });
   private programExecution$: Subject<BfExecutionState>;
   private output$ = new Subject<number>();
 

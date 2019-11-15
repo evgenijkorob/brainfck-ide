@@ -1,7 +1,6 @@
 /// <reference lib="webworker" />
 
 import { InterpreterController } from './interpreter-controller';
-
 import { InterpreterWorkerMessage } from './interpreter-worker-message';
 
 
