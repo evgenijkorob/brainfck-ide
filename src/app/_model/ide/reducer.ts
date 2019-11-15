@@ -24,6 +24,6 @@ const reducer = createReducer(
   on(finishCodeEditing, (state, { code }) => ({ ...state, code }))
 );
 
-export function IdeReducer(state: IdeState, action: Action) {
+export function ideReducer(state: IdeState, action: Action) {
   return reducer(state, action);
 }

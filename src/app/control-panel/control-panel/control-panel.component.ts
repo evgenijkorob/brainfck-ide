@@ -5,7 +5,9 @@ import { AppState } from 'src/app/_model/state';
 import { getIsReleaseExecutionRunning } from 'src/app/_model/control-panel/selectors';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faStop, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { startReleaseExecution, stopExecution } from 'src/app/_model/control-panel/actions';
+import {
+  startReleaseExecution, stopExecution, finishInterpreterInputEditing
+} from 'src/app/_model/control-panel/actions';
 
 @Component({
   selector: 'app-control-panel',
@@ -38,6 +40,10 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
     } else {
       this.store.dispatch(stopExecution());
     }
+  }
+
+  finishInterpreterInputEditing(input: string): void {
+    this.store.dispatch(finishInterpreterInputEditing({ input }));
   }
 
   ngOnDestroy() {

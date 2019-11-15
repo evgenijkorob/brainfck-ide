@@ -1,2 +1,8 @@
+input(
+  #interpreter_input,
+  placeholder='interpreter input',
+  (blur)='finishInterpreterInputEditing(interpreter_input.value)'
+)
 button((click)='clickOnReleaseExecutionControlButton()')
   app-icon([icon]='releaseExecutionControlIcon')
+br

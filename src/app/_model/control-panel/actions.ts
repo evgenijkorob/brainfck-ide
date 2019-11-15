@@ -1,4 +1,4 @@
-import { createAction } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 
 export const startReleaseExecution = createAction('[Control Panel] Start release execution');
 
@@ -13,3 +13,8 @@ export const makeDebugExecutionStep = createAction('[Control Panel] Make debug e
 export const stopExecution = createAction('[Control Panel] Stop execution');
 
 export const executionFinished = createAction('[Control Panel] Execution finished');
+
+export const finishInterpreterInputEditing = createAction(
+  '[Control Panel] Finish interpreter input editing',
+  props<{ input: string }>()
+);
