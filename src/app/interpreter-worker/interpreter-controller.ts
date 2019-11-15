@@ -1,5 +1,5 @@
 import {
-  BfInterpreter, BfInterpreterConfig, BfInterpreterOutputHandler, BfInterpreterStateHandler, BfExecutionState
+  BfInterpreter, BfInterpreterConfig, BfInterpreterOutputHandler, BfInterpreterStateHandler, BfExecutionState, BfInterpreterInitialData
 } from './interpreter';
 
 export class InterpreterController {
@@ -19,16 +19,15 @@ export class InterpreterController {
     config: BfInterpreterConfig
   ): void {
     this.config = config;
-    this.initializeInterpreterEntity();
   }
 
-  public runProgram(): void {
-    this.initializeInterpreterEntity();
+  public runProgram(initialData: BfInterpreterInitialData): void {
+    this.initializeInterpreterEntity(initialData);
     this.executeInParts(false);
   }
 
-  public debugProgram(breakpointArray: number[]): void {
-    this.initializeInterpreterEntity();
+  public debugProgram(initialData: BfInterpreterInitialData, breakpointArray: number[]): void {
+    this.initializeInterpreterEntity(initialData);
     this.breakpoints = breakpointArray.slice().sort();
     this.executeInParts(true);
   }
@@ -59,12 +58,12 @@ export class InterpreterController {
     }
   }
 
-  private initializeInterpreterEntity(): void {
+  private initializeInterpreterEntity(initialData: BfInterpreterInitialData): void {
     if (!this.config) {
       throw new Error('The interpreter is not initialized');
     }
     this.stop();
-    this.interpreter = new BfInterpreter(this.config, this.outputHandler);
+    this.interpreter = new BfInterpreter(this.config, initialData, this.outputHandler);
   }
 
   private executeInParts(debug: boolean): void {

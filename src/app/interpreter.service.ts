@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject, Subscription, PartialObserver, Observable } from 'rxjs';
-import { BfExecutionState, BfInterpreterConfig } from './interpreter';
-import { InterpreterWorkerMessage } from './interpreter-worker-message';
+import { BfExecutionState, BfInterpreterConfig, BfInterpreterInitialData } from './interpreter-worker/interpreter';
+import { InterpreterWorkerMessage } from './interpreter-worker/interpreter-worker-message';
 
 
 
@@ -22,17 +22,24 @@ export class InterpreterService {
     return this.output$.subscribe(observer);
   }
 
-  public run(config: BfInterpreterConfig): Observable<BfExecutionState> {
+  public run(
+    config: BfInterpreterConfig,
+    initialData: BfInterpreterInitialData
+  ): Observable<BfExecutionState> {
     this.programExecution$ = new Subject<BfExecutionState>();
     this.postMessageToWorker('initialize', config);
-    this.postMessageToWorker('run');
+    this.postMessageToWorker('run', initialData);
     return this.programExecution$.asObservable();
   }
 
-  public debug(config: BfInterpreterConfig, breakpoints: number[]): Observable<BfExecutionState> {
+  public debug(
+    config: BfInterpreterConfig,
+    initialData: BfInterpreterInitialData,
+    breakpoints: number[]
+  ): Observable<BfExecutionState> {
     this.programExecution$ = new Subject<BfExecutionState>();
     this.postMessageToWorker('initialize', config);
-    this.postMessageToWorker('debug', breakpoints);
+    this.postMessageToWorker('debug', { initialData, breakpoints });
     return this.programExecution$.asObservable();
   }
 

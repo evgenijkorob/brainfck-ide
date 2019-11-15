@@ -1,15 +1,18 @@
 export type TBfInterpreterMemory = Uint8Array | Uint16Array | Uint32Array;
 
-export interface BfInterpreterConfig {
-  memoryCellSize: 8 | 16 | 32;
-  memorySize: number;
-  code: string;
-  input: number[];
-}
-
 export type BfInterpreterOutputHandler = (charCode: number) => void;
 
 export type BfInterpreterStateHandler = (state: BfExecutionState) => void;
+
+export interface BfInterpreterConfig {
+  memoryCellSize: 8 | 16 | 32;
+  memorySize: number;
+}
+
+export interface BfInterpreterInitialData {
+  code: string;
+  input: number[];
+}
 
 export interface BfExecutionState {
   memory: TBfInterpreterMemory;
@@ -46,10 +49,13 @@ export class BfInterpreter {
   private finished = false;
 
   constructor(
-    settings: BfInterpreterConfig,
+    config: BfInterpreterConfig,
+    initialData: BfInterpreterInitialData,
     private outputHandler: BfInterpreterOutputHandler
   ) {
-    const { memoryCellSize, memorySize, code, input } = settings;
+    const { memoryCellSize, memorySize } = config;
+    const { code, input } = initialData;
+
     switch (memoryCellSize) {
       case 8:
         this.memory = new Uint8Array(memorySize);
@@ -102,44 +108,45 @@ export class BfInterpreter {
         this.memory[this.memoryPointer] -= 1;
         break;
       case BfSyntaxDict.incrementMemPointer:
-        this.memoryPointer += 1;
-        if (this.memoryPointer === this.memory.length) {
-          throw this.generateError('out of max mem bound');
-        }
+        this.addToMemoryPointer(1);
         break;
       case BfSyntaxDict.decrementMemPointer:
-        this.memoryPointer -= 1;
-        if (this.memoryPointer < 0) {
-          throw this.generateError('out of min mem bound');
-        }
+        this.addToMemoryPointer(-1);
         break;
       case BfSyntaxDict.startLoop:
-        if (this.memory[this.memoryPointer] !== 0) {
-          this.loopsBeginningCodePointerStack.push(this.codePointer);
-        } else {
-          this.codePointer = this.findExitFromLoop(this.codePointer);
-        }
+        this.figureOutLoopStart();
         break;
       case BfSyntaxDict.endLoop:
-        const currentLoopBeginning = this.loopsBeginningCodePointerStack[this.loopsBeginningCodePointerStack.length - 1];
-        if (this.memory[this.memoryPointer] === 0) {
-          this.loopsBeginningCodePointerStack.pop();
-        } else {
-          this.codePointer = currentLoopBeginning;
-        }
+        this.figureOutLoopEnd();
         break;
       case BfSyntaxDict.printCellValue:
         this.outputHandler(this.memory[this.memoryPointer]);
         break;
       case BfSyntaxDict.inputCellValue:
-        const charCode = this.input.length ? this.input.pop() : 0;
-        this.memory[this.memoryPointer] = charCode;
+        this.inputCellValue();
         break;
     }
     if (this.codePointer < this.code.length - 1) {
       this.codePointer += 1;
     } else {
       this.finished = true;
+    }
+  }
+
+  private addToMemoryPointer(value: number): void {
+    this.memoryPointer += value;
+    if (this.memoryPointer === this.memory.length) {
+      throw this.generateError('out of max mem bound');
+    } else if (this.memoryPointer < 0) {
+      throw this.generateError('out of min mem bound');
+    }
+  }
+
+  private figureOutLoopStart(): void {
+    if (this.memory[this.memoryPointer] !== 0) {
+      this.loopsBeginningCodePointerStack.push(this.codePointer);
+    } else {
+      this.codePointer = this.findExitFromLoop(this.codePointer);
     }
   }
 
@@ -157,6 +164,20 @@ export class BfInterpreter {
       }
     }
     return codePointer;
+  }
+
+  private figureOutLoopEnd(): void {
+    const currentLoopBeginning = this.loopsBeginningCodePointerStack[this.loopsBeginningCodePointerStack.length - 1];
+    if (this.memory[this.memoryPointer] === 0) {
+      this.loopsBeginningCodePointerStack.pop();
+    } else {
+      this.codePointer = currentLoopBeginning;
+    }
+  }
+
+  private inputCellValue(): void {
+    const charCode = this.input.length ? this.input.pop() : 0;
+    this.memory[this.memoryPointer] = charCode;
   }
 
   private generateError(message: string): BfInterpreterError {

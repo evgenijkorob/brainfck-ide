@@ -30,10 +30,10 @@ class InterpreterWorker {
           this.interpreterController.initialize(data.payload);
           break;
         case 'run':
-          this.interpreterController.runProgram();
+          this.interpreterController.runProgram(data.payload);
           break;
         case 'debug':
-          this.interpreterController.debugProgram(data.payload);
+          this.interpreterController.debugProgram(data.payload.initialData, data.payload.breakpoints);
           break;
         case 'continue':
           this.interpreterController.continueDebug(data.payload);
