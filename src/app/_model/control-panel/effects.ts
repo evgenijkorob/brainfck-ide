@@ -6,8 +6,8 @@ import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, exhaustMap, catchError } from 'rxjs/operators';
 import { startReleaseExecution, executionFinished, stopExecution } from './actions';
-import { getCode } from '../code-editor/selectors';
-import { BfInterpreterConfig } from 'src/app/interpreter';
+import { getCode } from '../ide/selectors';
+import { BfInterpreterConfig } from 'src/app/interpreter-worker/interpreter';
 
 @Injectable()
 export class ReleaseExecutionEffects {

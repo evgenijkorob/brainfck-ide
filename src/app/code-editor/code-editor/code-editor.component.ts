@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/_model/state';
-import { finishTypingCode } from 'src/app/_model/code-editor/actions';
+import { finishCodeEditing } from 'src/app/_model/ide/actions';
 
 @Component({
   selector: 'app-code-editor',
@@ -16,7 +16,7 @@ export class CodeEditorComponent implements OnInit {
   }
 
   finishTyping(code: string): void {
-    this.store.dispatch(finishTypingCode({ code }));
+    this.store.dispatch(finishCodeEditing({ code }));
   }
 
 }

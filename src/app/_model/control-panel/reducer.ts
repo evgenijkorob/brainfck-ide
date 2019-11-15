@@ -1,7 +1,7 @@
 import { createReducer, Action, on } from '@ngrx/store';
 import * as ControlPanelActions from './actions';
 
-export const controlPanelKey = 'control-panel';
+export const controlPanelFeatureKey = 'control-panel';
 
 export interface ControlPanelState {
   isReleaseExecutionRunning: boolean;
