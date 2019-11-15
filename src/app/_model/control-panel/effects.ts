@@ -4,7 +4,7 @@ import { AppState } from '../state';
 import { InterpreterService } from 'src/app/interpreter.service';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { Observable } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, exhaustMap } from 'rxjs/operators';
 import { startReleaseExecution, executionFinished, stopExecution } from './actions';
 import { getCode, getInterpreterConfig } from '../ide/selectors';
 import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter-worker/interpreter';
@@ -14,6 +14,9 @@ import { getInterpreterInput } from './selectors';
 
 @Injectable()
 export class ReleaseExecutionEffects {
+  private interpreterConfig: BfInterpreterConfig;
+  private interpreterInitialData: BfInterpreterInitialData;
+
   constructor(
     private store: Store<AppState>,
     private actions$: Actions,
@@ -22,14 +25,19 @@ export class ReleaseExecutionEffects {
     this.interpreter.subToOutput({
       next: charCode => console.log(String.fromCharCode(charCode))
     });
+    this.getConfigAndInitialData().subscribe({
+      next: ({ config, initialData }) => {
+        this.interpreterConfig = config;
+        this.interpreterInitialData = initialData;
+      }
+    });
   }
 
   public startReleaseExecution$ = createEffect(
     () => this.actions$.pipe(
       ofType(startReleaseExecution.type),
-      mergeMap(
-        action => this.getConfigAndInitialData().pipe(
-          mergeMap(({ config, initialData }) => this.interpreter.run(config, initialData)),
+      exhaustMap(
+        action => this.interpreter.run(this.interpreterConfig, this.interpreterInitialData).pipe(
           map(executionState => executionFinished()),
         )
       )
