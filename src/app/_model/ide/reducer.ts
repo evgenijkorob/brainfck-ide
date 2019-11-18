@@ -1,4 +1,4 @@
-import { BfInterpreterConfig } from 'src/app/interpreter-worker/interpreter';
+import { BfInterpreterConfig } from 'src/app/interpreter/interpreter';
 import { createReducer, Action, on } from '@ngrx/store';
 import { finishCodeEditing } from './actions';
 

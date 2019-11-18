@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store, select, createSelector } from '@ngrx/store';
 import { AppState } from '../state';
-import { InterpreterService } from 'src/app/interpreter.service';
+import { InterpreterService } from 'src/app/interpreter/interpreter.service';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { map, mergeMap, exhaustMap } from 'rxjs/operators';
 import { startReleaseExecution, executionFinished, stopExecution } from './actions';
 import { getCode, getInterpreterConfig } from '../ide/selectors';
-import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter-worker/interpreter';
+import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter/interpreter';
 import { getInterpreterInput } from './selectors';
 
 

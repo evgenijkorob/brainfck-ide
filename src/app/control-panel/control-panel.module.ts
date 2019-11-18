@@ -6,6 +6,7 @@ import { controlPanelFeatureKey, controlPanelReducer } from '../_model/control-p
 import { EffectsModule } from '@ngrx/effects';
 import { ReleaseExecutionEffects } from '../_model/control-panel/effects';
 import { SharedComponentsModule } from '../shared-components/shared-components.module';
+import { InterpreterModule } from '../interpreter/interpreter.module';
 
 
 
@@ -13,6 +14,7 @@ import { SharedComponentsModule } from '../shared-components/shared-components.m
   declarations: [ControlPanelComponent],
   imports: [
     CommonModule,
+    InterpreterModule,
     StoreModule.forFeature(controlPanelFeatureKey, controlPanelReducer),
     EffectsModule.forFeature([ReleaseExecutionEffects]),
     SharedComponentsModule

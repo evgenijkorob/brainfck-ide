@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Subject, Subscription, PartialObserver, Observable } from 'rxjs';
-import { BfExecutionState, BfInterpreterConfig, BfInterpreterInitialData } from './interpreter-worker/interpreter';
-import { InterpreterWorkerMessage } from './interpreter-worker/interpreter-worker-message';
+import { BfExecutionState, BfInterpreterConfig, BfInterpreterInitialData } from './interpreter';
+import { InterpreterWorkerMessage } from './interpreter-worker-message';
+import { InterpreterModule } from './interpreter.module';
 
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: InterpreterModule
 })
 export class InterpreterService {
-  private worker = new Worker('./interpreter-worker/interpreter.worker.ts', { type: 'module' });
+  private worker = new Worker('./interpreter.worker.ts', { type: 'module' });
   private programExecution$: Subject<BfExecutionState>;
   private output$ = new Subject<number>();
 
