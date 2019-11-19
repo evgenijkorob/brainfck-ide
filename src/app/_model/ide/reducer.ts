@@ -1,6 +1,6 @@
 import { BfInterpreterConfig } from 'src/app/interpreter/interpreter';
 import { createReducer, Action, on } from '@ngrx/store';
-import { finishCodeEditing } from './actions';
+import { codeChanged } from './actions';
 
 
 
@@ -21,7 +21,7 @@ const initialState: IdeState = {
 
 const reducer = createReducer(
   initialState,
-  on(finishCodeEditing, (state, { code }) => ({ ...state, code }))
+  on(codeChanged, (state, { code }) => ({ ...state, code }))
 );
 
 export function ideReducer(state: IdeState, action: Action) {

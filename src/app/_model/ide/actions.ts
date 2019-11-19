@@ -1,3 +1,3 @@
 import { createAction, props } from '@ngrx/store';
 
-export const finishCodeEditing = createAction('[Code Editor] Finish code editing', props<{code: string}>());
+export const codeChanged = createAction('[Code Editor] Code changed', props<{code: string}>());
