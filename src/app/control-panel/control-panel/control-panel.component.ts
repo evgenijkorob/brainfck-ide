@@ -4,10 +4,11 @@ import { Store, select } from '@ngrx/store';
 import { AppState } from 'src/app/_model/state';
 import { getIsReleaseExecutionRunning } from 'src/app/_model/control-panel/selectors';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { faStop, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faStop, faPlay, faPlus } from '@fortawesome/free-solid-svg-icons';
 import {
   startReleaseExecution, stopExecution, finishInterpreterInputEditing
 } from 'src/app/_model/control-panel/actions';
+import { addBreakpoint } from 'src/app/_model/editor-page/action';
 
 @Component({
   selector: 'app-control-panel',
@@ -15,6 +16,9 @@ import {
   styleUrls: ['./control-panel.component.scss']
 })
 export class ControlPanelComponent implements OnInit, OnDestroy {
+
+  public addBreakpointIcon = faPlus;
+
   private isReleaseExecutionRunning: boolean;
   private isReleaseExecutionRunningSub: Subscription;
 
@@ -44,6 +48,10 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
 
   finishInterpreterInputEditing(input: string): void {
     this.store.dispatch(finishInterpreterInputEditing({ input }));
+  }
+
+  clickOnAddBreakpointButton(): void {
+    this.store.dispatch(addBreakpoint());
   }
 
   ngOnDestroy() {
