@@ -28,7 +28,7 @@ export class InterpreterController {
 
   public debugProgram(initialData: BfInterpreterInitialData, breakpointArray: number[]): void {
     this.initializeInterpreterEntity(initialData);
-    this.breakpoints = breakpointArray.slice().sort();
+    this.breakpoints = breakpointArray;
     this.executeInParts(true);
   }
 
@@ -36,7 +36,7 @@ export class InterpreterController {
     if (!this.isRunning) {
       throw new Error('Program is not running');
     }
-    this.breakpoints = breakpointArray.slice().sort();
+    this.breakpoints = breakpointArray;
     this.executeInParts(true);
   }
 
