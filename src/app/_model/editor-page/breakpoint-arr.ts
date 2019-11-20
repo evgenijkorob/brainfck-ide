@@ -10,5 +10,6 @@ export interface BreakpointArr extends EntityState<Breakpoint> {
 
 export const breakpointArrAdapter: EntityAdapter<Breakpoint> =
   createEntityAdapter<Breakpoint>({
-    selectId: (breakpoint) => breakpoint.index
+    selectId: (breakpoint) => breakpoint.index,
+    sortComparer: (a, b) => a.index - b.index
   });

@@ -18,7 +18,7 @@ const reducer = createReducer(
   initialState,
   on(changeCursorIndex, (state, { cursorIndex }) => ({ ...state, cursorIndex })),
   on(addBreakpoint, (state) => {
-    if (!state.cursorIndex) {
+    if (state.cursorIndex === null) {
       return state;
     }
     return {

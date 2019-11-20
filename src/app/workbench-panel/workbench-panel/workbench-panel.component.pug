@@ -1,0 +1,7 @@
+.tabs
+  button((click)='clickOnTabButton(TAB_TITLES.Breakpoints)') {{TAB_TITLES.Breakpoints}}
+ng-container(*ngIf='isContentOpened')
+  ng-container(
+    [ngSwitch]='activeTabTitle'
+  )
+    app-breakpoints-tab(*ngSwitchCase='TAB_TITLES.Breakpoints')

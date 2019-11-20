@@ -7,6 +7,7 @@ import { CodeEditorModule } from '../code-editor/code-editor.module';
 import { ControlPanelModule } from '../control-panel/control-panel.module';
 import { StoreModule } from '@ngrx/store';
 import { editorPageFeatureKey, editorPageReducer } from '../_model/editor-page/reducer';
+import { WorkbenchPanelModule } from '../workbench-panel/workbench-panel.module';
 
 
 
@@ -17,7 +18,8 @@ import { editorPageFeatureKey, editorPageReducer } from '../_model/editor-page/r
     StoreModule.forFeature(editorPageFeatureKey, editorPageReducer),
     SharedComponentsModule,
     CodeEditorModule,
-    ControlPanelModule
+    ControlPanelModule,
+    WorkbenchPanelModule
   ],
   exports: [EditorPageComponent]
 })

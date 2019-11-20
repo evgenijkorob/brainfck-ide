@@ -1,0 +1,14 @@
+button((click)='clickOnRemoveAllBreakpointsButton()')
+  app-icon([icon]='removeAllBreakpointsIcon')
+br
+.breakpoint(
+  *ngFor='let breakpoint of breakpoints; trackBy: trackById'
+)
+  input(
+    type='checkbox',
+    [checked]='breakpoint.isActive',
+    (change)='clickOnToggleBreakpointButton(breakpoint)'
+  )
+  span breakpoint at {{breakpoint.index}}
+  button((click)='clickOnRemoveBreakpointButton(breakpoint)')
+    app-icon([icon]='removeBreakpointIcon')
