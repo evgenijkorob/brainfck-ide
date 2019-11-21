@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/_model/state';
-import { codeChanged } from 'src/app/_model/ide/actions';
+import { codeChanged } from 'src/app/_model/user-data/code.actions';
 import { EditorService } from 'src/app/editor/editor.service';
 import { debounceTime } from 'rxjs/operators';
 import { changeCursorIndex } from 'src/app/_model/editor-page/action';

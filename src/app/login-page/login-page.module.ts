@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoginPageComponent } from './login-page.component';
 import { RouterModule } from '@angular/router';
+import { StoreModule } from '@ngrx/store';
+import { userDataFeatureKey, userDataFeatureReducerMap } from '../_model/user-data/_reducer';
 
 
 
@@ -9,7 +11,8 @@ import { RouterModule } from '@angular/router';
   declarations: [LoginPageComponent],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    StoreModule.forFeature(userDataFeatureKey, userDataFeatureReducerMap)
   ],
   exports: [LoginPageComponent]
 })
