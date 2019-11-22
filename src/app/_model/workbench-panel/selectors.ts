@@ -13,3 +13,8 @@ export const getIsContentOpened = createSelector(
   getWorkbenchPanelState,
   state => state.isContentOpened
 );
+
+export const getOutput = createSelector(
+  getWorkbenchPanelState,
+  state => state.output
+);

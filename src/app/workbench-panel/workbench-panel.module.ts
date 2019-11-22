@@ -5,15 +5,16 @@ import { BreakpointsTabComponent } from './breakpoints-tab/breakpoints-tab.compo
 import { SharedComponentsModule } from '../shared-components/shared-components.module';
 import { StoreModule } from '@ngrx/store';
 import { workbenchPanelFeatureKey, workbenchPanelReducer } from '../_model/workbench-panel/reducer';
+import { OutputTabComponent } from './output-tab/output-tab.component';
 
 
 
 @NgModule({
-  declarations: [WorkbenchPanelComponent, BreakpointsTabComponent],
+  declarations: [WorkbenchPanelComponent, BreakpointsTabComponent, OutputTabComponent],
   imports: [
     CommonModule,
-    SharedComponentsModule,
-    StoreModule.forFeature(workbenchPanelFeatureKey, workbenchPanelReducer)
+    StoreModule.forFeature(workbenchPanelFeatureKey, workbenchPanelReducer),
+    SharedComponentsModule
   ],
   exports: [WorkbenchPanelComponent]
 })

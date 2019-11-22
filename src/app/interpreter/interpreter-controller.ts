@@ -7,7 +7,7 @@ export class InterpreterController {
   private breakpoints: number[];
   private interpreter: BfInterpreter;
   private executionTimer;
-  private timeToExecutePart = 50;
+  private timeToExecutePart = 200;
   private isRunning = false;
 
   constructor(

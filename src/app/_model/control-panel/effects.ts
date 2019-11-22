@@ -10,6 +10,7 @@ import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpret
 import { getInterpreterInput } from './selectors';
 import { getInterpreterConfig } from '../user-data/settings.selectors';
 import { getCode } from '../user-data/code.selectors';
+import { printOutput, clearOutput } from '../workbench-panel/actions';
 
 
 
@@ -24,7 +25,7 @@ export class ReleaseExecutionEffects {
     private interpreter: InterpreterService
   ) {
     this.interpreter.subToOutput({
-      next: charCode => console.log(String.fromCharCode(charCode))
+      next: charCode => this.dispatchOutput(charCode)
     });
     this.getConfigAndInitialData().subscribe({
       next: ({ config, initialData }) => {
@@ -45,6 +46,13 @@ export class ReleaseExecutionEffects {
     )
   );
 
+  public clearOutputOnExecutionStart = createEffect(
+    () => this.actions$.pipe(
+      ofType(startReleaseExecution.type),
+      map(action => clearOutput())
+    )
+  );
+
   public stopReleaseExecution$ = createEffect(
     () => this.actions$.pipe(
       ofType(stopExecution.type),
@@ -56,6 +64,11 @@ export class ReleaseExecutionEffects {
       )
     )
   );
+
+  private dispatchOutput(charCode: number): void {
+    const str = String.fromCharCode(charCode);
+    this.store.dispatch(printOutput({ str }));
+  }
 
   private getConfigAndInitialData(): Observable<{ config: BfInterpreterConfig, initialData: BfInterpreterInitialData}> {
     return this.store.pipe(
