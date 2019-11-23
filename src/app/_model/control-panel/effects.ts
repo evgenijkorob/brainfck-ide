@@ -3,8 +3,8 @@ import { Store, select, createSelector, Action } from '@ngrx/store';
 import { AppState } from '../state';
 import { InterpreterService } from 'src/app/interpreter/interpreter.service';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
-import { Observable, merge, combineLatest } from 'rxjs';
-import { map, exhaustMap, withLatestFrom, switchMap, mapTo, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, withLatestFrom, switchMap, mapTo, tap, concatMap } from 'rxjs/operators';
 import { startReleaseExecution, executionFinished, stopExecution, startDebugExecution } from './actions';
 import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter/interpreter';
 import { getInterpreterInput } from './selectors';
@@ -32,7 +32,7 @@ export class ExecutionEffects {
 
   public startReleaseExecution$ = createEffect(() => this.actions$.pipe(
     ofType(startReleaseExecution.type),
-    withLatestFrom(this.getConfigAndInitialData()),
+    concatMap(withLatestFrom(this.getConfigAndInitialData())),
     switchMap(
       ([, { config, initialData }]) => this.interpreter.run(config, initialData).pipe(
         mapTo(executionFinished())
