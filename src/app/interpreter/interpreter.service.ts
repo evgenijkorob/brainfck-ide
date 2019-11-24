@@ -12,15 +12,15 @@ import { InterpreterModule } from './interpreter.module';
 export class InterpreterService {
   private worker = new Worker('./interpreter.worker.ts', { type: 'module' });
   private programExecution$: Subject<BfExecutionState>;
-  private output$ = new Subject<number>();
+  private outputSubj = new Subject<number>();
 
   constructor() {
     this.worker.onmessage = ({ data }) => this.handleWorkerMessage(data);
     this.worker.onerror = console.error;
   }
 
-  public subToOutput(observer: PartialObserver<number>): Subscription {
-    return this.output$.subscribe(observer);
+  public get output$(): Observable<number> {
+    return this.outputSubj.asObservable();
   }
 
   public run(
@@ -64,7 +64,7 @@ export class InterpreterService {
   private handleWorkerMessage(data: InterpreterWorkerMessage): void {
     switch (data.message) {
       case 'output':
-        this.output$.next(data.payload);
+        this.outputSubj.next(data.payload);
         break;
       case 'error':
         this.programExecution$.error({ message: data.payload });

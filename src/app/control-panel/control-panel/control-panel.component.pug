@@ -3,7 +3,24 @@ input(
   placeholder='interpreter input',
   (blur)='finishInterpreterInputEditing(interpreter_input.value)'
 )
+
 button((click)='clickOnReleaseExecutionControlButton()')
   app-icon([icon]='releaseExecutionControlIcon')
+
+button((click)='clickOnDebugExecutionControlButton()')
+  app-icon([icon]='debugExecutionControlIcon')
+
+button(
+  (click)='clickOnContinueDebugButton()',
+  [disabled]='!(isDebugExecutionPaused$ | async)'
+)
+  app-icon([icon]='continueIcon')
+
+button(
+  (click)='clickOnMakeStepButton()',
+  [disabled]='!(isDebugExecutionPaused$ | async)'
+)
+  app-icon([icon]='makeStepIcon')
+
 button((click)='clickOnAddBreakpointButton()')
   app-icon([icon]='addBreakpointIcon')

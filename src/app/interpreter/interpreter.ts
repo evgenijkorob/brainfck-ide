@@ -96,7 +96,7 @@ export class BfInterpreter {
   }
 
   private achievedBreakpoint(breakpoints?: number[]): boolean {
-    return breakpoints && breakpoints.find((point) => point === this.codePointer) !== -1;
+    return breakpoints && (breakpoints.findIndex(point => (point === this.codePointer)) !== -1);
   }
 
   private executeCommand(): void {

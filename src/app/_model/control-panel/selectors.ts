@@ -6,6 +6,16 @@ export const getControlPanelState = createFeatureSelector<AppState, ControlPanel
 
 export const getIsReleaseExecutionRunning = createSelector(getControlPanelState, state => state.isReleaseExecutionRunning);
 
+export const getIsDebugExecutionRunning = createSelector(
+  getControlPanelState,
+  state => state.isDebugExecutionRunning
+);
+
+export const getIsDebugExecutionPaused = createSelector(
+  getControlPanelState,
+  state => state.isDebugExecutionPaused
+);
+
 export const getInterpreterInput = createSelector(
   getControlPanelState,
   state => state.interpreterInput

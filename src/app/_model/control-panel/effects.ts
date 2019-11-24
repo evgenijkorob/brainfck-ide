@@ -4,13 +4,14 @@ import { AppState } from '../state';
 import { InterpreterService } from 'src/app/interpreter/interpreter.service';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { Observable } from 'rxjs';
-import { map, withLatestFrom, switchMap, mapTo, tap, concatMap } from 'rxjs/operators';
-import { startReleaseExecution, executionFinished, stopExecution, startDebugExecution } from './actions';
+import { map, withLatestFrom, switchMap, mapTo, tap } from 'rxjs/operators';
+import * as ControlPanelActions from './actions';
 import { BfInterpreterConfig, BfInterpreterInitialData } from 'src/app/interpreter/interpreter';
 import { getInterpreterInput } from './selectors';
 import { getInterpreterConfig } from '../user-data/settings.selectors';
 import { getCode } from '../user-data/code.selectors';
 import { printOutput, clearOutput } from '../workbench-panel/actions';
+import { getActiveBreakpointIndexes } from '../editor-page/selectors';
 
 
 
@@ -26,24 +27,61 @@ export class ExecutionEffects {
   }
 
   public clearOutputOnExecutionStarted$ = createEffect(() => this.actions$.pipe(
-    ofType(startReleaseExecution.type, startDebugExecution.type),
+    ofType(ControlPanelActions.startReleaseExecution.type, ControlPanelActions.startDebugExecution.type),
     mapTo(clearOutput())
   ));
 
   public startReleaseExecution$ = createEffect(() => this.actions$.pipe(
-    ofType(startReleaseExecution.type),
-    concatMap(withLatestFrom(this.getConfigAndInitialData())),
+    ofType(ControlPanelActions.startReleaseExecution.type),
+    withLatestFrom(this.getConfigAndInitialData()),
     switchMap(
       ([, { config, initialData }]) => this.interpreter.run(config, initialData).pipe(
-        mapTo(executionFinished())
+        mapTo(ControlPanelActions.executionFinished())
       )
     )
   ));
 
+  public startDebugExecution$ = createEffect(() => this.actions$.pipe(
+    ofType(ControlPanelActions.startDebugExecution.type),
+    withLatestFrom(this.getConfigAndInitialData(), this.store.pipe(select(getActiveBreakpointIndexes))),
+    switchMap(
+      ([, { config, initialData }, breakpoints]) => this.interpreter.debug(config, initialData, breakpoints).pipe(
+        map(executionState => {
+          if (executionState.paused) {
+            return ControlPanelActions.debugExecutionPaused();
+          } else {
+            return ControlPanelActions.executionFinished();
+          }
+        })
+      )
+    )
+  ));
+
+  public continueDebugExecution$ = createEffect(
+    () => this.actions$.pipe(
+      ofType(ControlPanelActions.continueDebugExecution.type),
+      withLatestFrom(this.store.pipe(select(getActiveBreakpointIndexes))),
+      tap(([, breakpoints]) => this.interpreter.continue(breakpoints))
+    ),
+    {
+      dispatch: false
+    }
+  );
+
+  public makeStep$ = createEffect(
+    () => this.actions$.pipe(
+      ofType(ControlPanelActions.makeDebugExecutionStep.type),
+      tap(() => this.interpreter.step())
+    ),
+    {
+      dispatch: false
+    }
+  );
+
   public stopExecution$ = createEffect(() => this.actions$.pipe(
-    ofType(stopExecution.type),
+    ofType(ControlPanelActions.stopExecution.type),
     tap(() => this.interpreter.stop()),
-    mapTo(executionFinished())
+    mapTo(ControlPanelActions.executionFinished())
   ));
 
   private printInterpreterOutput$ = this.interpreter.output$.pipe(
