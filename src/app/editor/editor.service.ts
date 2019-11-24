@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Ace, edit } from 'ace-builds';
+import { Ace, edit, Range } from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-github';
 import { getBfModeConstructor } from './bf-mode';
 import { Subject, Observable } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { startWith, tap } from 'rxjs/operators';
 
 
 
@@ -18,12 +18,18 @@ const EDITOR_OPTIONS: Partial<Ace.EditorOptions> = {
   useSoftTabs: true
 };
 
+interface EditorBreakpoint {
+  index: number;
+  id: number;
+}
+
 @Injectable()
 export class EditorService {
 
   private editor: Ace.Editor;
   private onChangeSubj = new Subject<string>();
   private onCursorPosChangeSubj = new Subject<number>();
+  private editorBreakpoints: EditorBreakpoint[] = [];
 
   public get onChange$(): Observable<string> {
     return this.onChangeSubj.asObservable();
@@ -54,6 +60,32 @@ export class EditorService {
     this.editor = edit(el, EDITOR_OPTIONS);
     this.session.setMode(bfMode);
     this.setCallbacks();
+  }
+
+  public setBreakpointObservableSource(breakpointsIndexes$: Observable<number[]>): void {
+    breakpointsIndexes$.subscribe({ next: breakpoints => this.refreshBreakpointHighlight(breakpoints) });
+  }
+
+  private refreshBreakpointHighlight(breakpointsIndexes: number[]): void {
+    for (const editorBreakpoint of this.editorBreakpoints) {
+      this.session.removeMarker(editorBreakpoint.id);
+    }
+    for (const index of breakpointsIndexes) {
+      this.editorBreakpoints.push(this.highlightBreakpoint(index));
+    }
+  }
+
+  private highlightBreakpoint(breakpointIndex: number): EditorBreakpoint {
+    const startPoint = this.session.getDocument().indexToPosition(breakpointIndex, 0);
+    const endPoint = this.session.getDocument().indexToPosition(breakpointIndex + 1, 0);
+    const breakpointRange = Range.fromPoints(startPoint, endPoint);
+    console.log(breakpointRange);
+    const id = this.session.addMarker(breakpointRange, 'bf-breakpoint', 'text', true);
+    const editorBreakpoint: EditorBreakpoint = {
+      index: breakpointIndex,
+      id
+    };
+    return editorBreakpoint;
   }
 
   private setCallbacks(): void {

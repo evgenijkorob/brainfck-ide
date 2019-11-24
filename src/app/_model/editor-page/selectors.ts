@@ -5,9 +5,14 @@ import { breakpointArrAdapter } from './breakpoint-arr';
 
 export const getEditorPageState = createFeatureSelector<AppState, EditorPageState>(editorPageFeatureKey);
 
-export const getBreakpoints = createSelector(
+export const getBreakpointArr = createSelector(
   getEditorPageState,
-  state => breakpointArrAdapter.getSelectors().selectAll(state.breakpoints)
+  state => state.breakpoints
+);
+
+export const getBreakpoints = createSelector(
+  getBreakpointArr,
+  breakpointArr => breakpointArrAdapter.getSelectors().selectAll(breakpointArr)
 );
 
 export const getActiveBreakpointIndexes = createSelector(
