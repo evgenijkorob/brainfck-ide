@@ -4,7 +4,34 @@
   font-size: 24px;
 }
 
-.ace_br15 {
+.ace_bf-token {
+
+  font-weight: bold;
+
+  &_io {
+    color: orangered;
+  }
+
+  &_pointer {
+    color: #0089ff;
+  }
+
+  &_memory {
+    color: #31a530;
+  }
+
+  &_loop {
+    color: #ae00ff;
+  }
+}
+
+.bf-highlighter {
+
   position: absolute;
-  background: #ff000067;
+  border-radius: 0px;
+  box-sizing: border-box;
+
+  &_breakpoint {
+    border: 2px solid red;
+  }
 }

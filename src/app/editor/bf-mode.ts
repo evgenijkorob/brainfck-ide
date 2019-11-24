@@ -21,19 +21,19 @@ function makeBfHighlightRules(aceOop) {
       start: [
         {
           regex: /,|\./,
-          token: 'keyword'
+          token: 'bf-token.bf-token_io'
         },
         {
           regex: /<|>/,
-          token: 'keyword.constant.buildin'
+          token: 'bf-token.bf-token_pointer'
         },
         {
           regex: /\+|\-/,
-          token: 'keyword.string'
+          token: 'bf-token.bf-token_memory'
         },
         {
           regex: /\[|\]/,
-          token: 'keyword'
+          token: 'bf-token.bf-token_loop'
         }
       ]
     };

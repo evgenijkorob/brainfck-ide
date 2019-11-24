@@ -18,6 +18,8 @@ const EDITOR_OPTIONS: Partial<Ace.EditorOptions> = {
   useSoftTabs: true
 };
 
+const BF_HIGHLIGHTER_CLASS = 'bf-highlighter';
+
 interface EditorBreakpoint {
   index: number;
   id: number;
@@ -45,6 +47,14 @@ export class EditorService {
 
   private get selection(): Ace.Selection {
     return this.editor.getSession().getSelection();
+  }
+
+  private get document(): Ace.Document {
+    return this.editor.getSession().getDocument();
+  }
+
+  private get breakpointHighlighterClass(): string {
+    return `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_breakpoint`;
   }
 
   constructor() { }
@@ -76,11 +86,10 @@ export class EditorService {
   }
 
   private highlightBreakpoint(breakpointIndex: number): EditorBreakpoint {
-    const startPoint = this.session.getDocument().indexToPosition(breakpointIndex, 0);
-    const endPoint = this.session.getDocument().indexToPosition(breakpointIndex + 1, 0);
+    const startPoint = this.document.indexToPosition(breakpointIndex, 0);
+    const endPoint = this.document.indexToPosition(breakpointIndex + 1, 0);
     const breakpointRange = Range.fromPoints(startPoint, endPoint);
-    console.log(breakpointRange);
-    const id = this.session.addMarker(breakpointRange, 'bf-breakpoint', 'text', true);
+    const id = this.session.addMarker(breakpointRange, this.breakpointHighlighterClass, 'text', true);
     const editorBreakpoint: EditorBreakpoint = {
       index: breakpointIndex,
       id
@@ -95,6 +104,6 @@ export class EditorService {
 
   private currentCursorPosToDocIndex(): number {
     const pos = this.selection.getCursor();
-    return this.session.getDocument().positionToIndex(pos);
+    return this.document.positionToIndex(pos);
   }
 }
