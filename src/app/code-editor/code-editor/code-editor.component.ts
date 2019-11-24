@@ -7,6 +7,7 @@ import { debounceTime } from 'rxjs/operators';
 import { changeCursorIndex } from 'src/app/_model/editor-page/action';
 import { Subscription } from 'rxjs';
 import { getActiveBreakpointIndexes } from 'src/app/_model/editor-page/selectors';
+import { getExecutionPosIndex } from 'src/app/_model/control-panel/selectors';
 
 @Component({
   selector: 'app-code-editor',
@@ -30,6 +31,7 @@ export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorOnCursorIndexChangeSub = this.editor.onCursorIndexChange$.pipe(debounceTime(500))
       .subscribe({ next: (index) => this.store.dispatch(changeCursorIndex({ cursorIndex: index })) });
     this.editor.setBreakpointObservableSource(this.store.pipe(select(getActiveBreakpointIndexes)));
+    this.editor.setExecutionPosObservableSource(this.store.pipe(select(getExecutionPosIndex)));
   }
 
   ngAfterViewInit() {

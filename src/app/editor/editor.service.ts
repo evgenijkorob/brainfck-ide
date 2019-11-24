@@ -32,6 +32,7 @@ export class EditorService {
   private onChangeSubj = new Subject<string>();
   private onCursorPosChangeSubj = new Subject<number>();
   private editorBreakpoints: EditorBreakpoint[] = [];
+  private executionHighlightId: number;
 
   public get onChange$(): Observable<string> {
     return this.onChangeSubj.asObservable();
@@ -57,6 +58,10 @@ export class EditorService {
     return `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_breakpoint`;
   }
 
+  private get executionPosHighlighterClass(): string {
+    return `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_execution-pos`;
+  }
+
   constructor() { }
 
   public initializeOnDomElement(el: any): void {
@@ -76,6 +81,19 @@ export class EditorService {
     breakpointsIndexes$.subscribe({ next: breakpoints => this.refreshBreakpointHighlight(breakpoints) });
   }
 
+  public setExecutionPosObservableSource(executionPos$: Observable<number>): void {
+    executionPos$.subscribe({ next: pos => this.refreshExecutionPosHighlight(pos) });
+  }
+
+  private refreshExecutionPosHighlight(posIndex: number): void {
+    this.session.removeMarker(this.executionHighlightId);
+    if (posIndex === null) {
+      return;
+    }
+    const executionRange = this.getOneLetterRange(posIndex);
+    this.executionHighlightId = this.session.addMarker(executionRange, this.executionPosHighlighterClass, 'text', true);
+  }
+
   private refreshBreakpointHighlight(breakpointsIndexes: number[]): void {
     for (const editorBreakpoint of this.editorBreakpoints) {
       this.session.removeMarker(editorBreakpoint.id);
@@ -86,15 +104,20 @@ export class EditorService {
   }
 
   private highlightBreakpoint(breakpointIndex: number): EditorBreakpoint {
-    const startPoint = this.document.indexToPosition(breakpointIndex, 0);
-    const endPoint = this.document.indexToPosition(breakpointIndex + 1, 0);
-    const breakpointRange = Range.fromPoints(startPoint, endPoint);
+    const breakpointRange = this.getOneLetterRange(breakpointIndex);
     const id = this.session.addMarker(breakpointRange, this.breakpointHighlighterClass, 'text', true);
     const editorBreakpoint: EditorBreakpoint = {
       index: breakpointIndex,
       id
     };
     return editorBreakpoint;
+  }
+
+  private getOneLetterRange(fileIndex: number): Ace.Range {
+    const startPoint = this.document.indexToPosition(fileIndex, 0);
+    const endPoint = this.document.indexToPosition(fileIndex + 1, 0);
+    const breakpointRange = Range.fromPoints(startPoint, endPoint);
+    return breakpointRange;
   }
 
   private setCallbacks(): void {

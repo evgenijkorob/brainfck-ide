@@ -1,10 +1,14 @@
 import { createAction, props } from '@ngrx/store';
+import { BfExecutionState } from 'src/app/interpreter/interpreter';
 
 export const startReleaseExecution = createAction('[Control Panel] Start release execution');
 
 export const startDebugExecution = createAction('[Control Panel] Start debug execution');
 
-export const debugExecutionPaused = createAction('[Control Panel] Debug execution paused');
+export const debugExecutionPaused = createAction(
+  '[Control Panel] Debug execution paused',
+  props<{ execution: BfExecutionState }>()
+);
 
 export const continueDebugExecution = createAction('[Control Panel] Continue debug execution');
 

@@ -8,13 +8,15 @@ export interface ControlPanelState {
   isDebugExecutionRunning: boolean;
   isDebugExecutionPaused: boolean;
   interpreterInput: number[];
+  executionPos: number;
 }
 
 const initialState: ControlPanelState = {
   isReleaseExecutionRunning: false,
   isDebugExecutionRunning: false,
   isDebugExecutionPaused: false,
-  interpreterInput: []
+  interpreterInput: [],
+  executionPos: null
 };
 
 const reducer = createReducer(
@@ -24,7 +26,8 @@ const reducer = createReducer(
     ...state,
     isReleaseExecutionRunning: false,
     isDebugExecutionRunning: false,
-    isDebugExecutionPaused: false
+    isDebugExecutionPaused: false,
+    executionPos: null
   })),
   on(
     ControlPanelActions.finishInterpreterInputEditing,
@@ -39,7 +42,7 @@ const reducer = createReducer(
   ),
   on(
     ControlPanelActions.debugExecutionPaused,
-    state => ({ ...state, isDebugExecutionPaused: true })
+    (state, { execution }) => ({ ...state, isDebugExecutionPaused: true, executionPos: execution.codePointer })
   )
 );
 

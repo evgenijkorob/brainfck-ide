@@ -20,3 +20,8 @@ export const getInterpreterInput = createSelector(
   getControlPanelState,
   state => state.interpreterInput
 );
+
+export const getExecutionPosIndex = createSelector(
+  getControlPanelState,
+  state => state.executionPos
+);

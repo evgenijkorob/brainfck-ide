@@ -48,7 +48,7 @@ export class ExecutionEffects {
       ([, { config, initialData }, breakpoints]) => this.interpreter.debug(config, initialData, breakpoints).pipe(
         map(executionState => {
           if (executionState.paused) {
-            return ControlPanelActions.debugExecutionPaused();
+            return ControlPanelActions.debugExecutionPaused({ execution: executionState });
           } else {
             return ControlPanelActions.executionFinished();
           }
