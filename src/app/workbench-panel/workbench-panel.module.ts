@@ -6,11 +6,12 @@ import { SharedComponentsModule } from '../shared-components/shared-components.m
 import { StoreModule } from '@ngrx/store';
 import { workbenchPanelFeatureKey, workbenchPanelReducer } from '../_model/workbench-panel/reducer';
 import { OutputTabComponent } from './output-tab/output-tab.component';
+import { AutoscrollDirective } from './autoscroll.directive';
 
 
 
 @NgModule({
-  declarations: [WorkbenchPanelComponent, BreakpointsTabComponent, OutputTabComponent],
+  declarations: [WorkbenchPanelComponent, BreakpointsTabComponent, OutputTabComponent, AutoscrollDirective],
   imports: [
     CommonModule,
     StoreModule.forFeature(workbenchPanelFeatureKey, workbenchPanelReducer),

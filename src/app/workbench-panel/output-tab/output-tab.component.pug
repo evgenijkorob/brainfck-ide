@@ -1,3 +1,3 @@
 button((click)='onClearOutputButtonClick()')
   app-icon([icon]='clearOutputIcon')
-pre.output {{ output$ | async }}
+pre.output(appAutoscroll) {{ output$ | async }}
