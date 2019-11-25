@@ -1,11 +1,10 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { AppState } from 'src/app/_model/state';
 import { codeChanged } from 'src/app/_model/user-data/code.actions';
-import { EditorService } from 'src/app/editor/editor.service';
 import { debounceTime } from 'rxjs/operators';
 import { changeCursorIndex } from 'src/app/_model/editor-page/action';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable, Subject } from 'rxjs';
 import { getActiveBreakpointIndexes } from 'src/app/_model/editor-page/selectors';
 import { getExecutionPosIndex } from 'src/app/_model/control-panel/selectors';
 
@@ -15,31 +14,37 @@ import { getExecutionPosIndex } from 'src/app/_model/control-panel/selectors';
   styleUrls: ['./code-editor.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class CodeEditorComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CodeEditorComponent implements OnInit, OnDestroy {
 
-  private editorOnChangeSub: Subscription;
-  private editorOnCursorIndexChangeSub: Subscription;
+  public breakpointsSource$: Observable<number[]> = this.store.pipe(select(getActiveBreakpointIndexes));
+  public executionPosSource$: Observable<number> = this.store.pipe(select(getExecutionPosIndex));
+
+  private codeChange$ = new Subject<string>();
+  private cursorIndexChange$ = new Subject<number>();
+  private onCodeChangeSub: Subscription;
+  private onCursorIndexChangeSub: Subscription;
 
   constructor(
-    private store: Store<AppState>,
-    private editor: EditorService
+    private store: Store<AppState>
   ) { }
 
   ngOnInit() {
-    this.editorOnChangeSub = this.editor.onChange$.pipe(debounceTime(800))
+    this.onCodeChangeSub = this.codeChange$.pipe(debounceTime(800))
       .subscribe({ next: (code) => this.store.dispatch(codeChanged({ code })) });
-    this.editorOnCursorIndexChangeSub = this.editor.onCursorIndexChange$.pipe(debounceTime(500))
+    this.onCursorIndexChangeSub = this.cursorIndexChange$.pipe(debounceTime(500))
       .subscribe({ next: (index) => this.store.dispatch(changeCursorIndex({ cursorIndex: index })) });
-    this.editor.setBreakpointObservableSource(this.store.pipe(select(getActiveBreakpointIndexes)));
-    this.editor.setExecutionPosObservableSource(this.store.pipe(select(getExecutionPosIndex)));
   }
 
-  ngAfterViewInit() {
+  onCodeChange(code: string): void {
+    this.codeChange$.next(code);
+  }
 
+  onCursorIndexChange(index: number): void {
+    this.cursorIndexChange$.next(index);
   }
 
   ngOnDestroy() {
-    this.editorOnChangeSub.unsubscribe();
-    this.editorOnCursorIndexChangeSub.unsubscribe();
+    this.onCodeChangeSub.unsubscribe();
+    this.onCursorIndexChangeSub.unsubscribe();
   }
 }

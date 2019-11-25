@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Ace, edit, Range } from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-github';
 import { getBfModeConstructor } from './bf-mode';
-import { Subject, Observable } from 'rxjs';
-import { startWith, tap } from 'rxjs/operators';
+import { Subject, Observable, Subscription } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 
 
@@ -20,6 +20,10 @@ const EDITOR_OPTIONS: Partial<Ace.EditorOptions> = {
 
 const BF_HIGHLIGHTER_CLASS = 'bf-highlighter';
 
+const BF_BREAKPOINT_HIGHLIGHTER_CLASS = `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_breakpoint`;
+
+const BF_EXECUTION_POINT_HIGHLIGHTER_CLASS = `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_execution-pos`;
+
 interface EditorBreakpoint {
   index: number;
   id: number;
@@ -29,13 +33,15 @@ interface EditorBreakpoint {
 export class EditorService {
 
   private editor: Ace.Editor;
-  private onChangeSubj = new Subject<string>();
+  private onCodeChangeSubj = new Subject<string>();
   private onCursorPosChangeSubj = new Subject<number>();
   private editorBreakpoints: EditorBreakpoint[] = [];
   private executionHighlightId: number;
+  private breakpointsSub: Subscription;
+  private executionPosSub: Subscription;
 
-  public get onChange$(): Observable<string> {
-    return this.onChangeSubj.asObservable();
+  public get onCodeChange$(): Observable<string> {
+    return this.onCodeChangeSubj.asObservable();
   }
 
   public get onCursorIndexChange$(): Observable<number> {
@@ -54,14 +60,6 @@ export class EditorService {
     return this.editor.getSession().getDocument();
   }
 
-  private get breakpointHighlighterClass(): string {
-    return `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_breakpoint`;
-  }
-
-  private get executionPosHighlighterClass(): string {
-    return `${BF_HIGHLIGHTER_CLASS} ${BF_HIGHLIGHTER_CLASS}_execution-pos`;
-  }
-
   constructor() { }
 
   public initializeOnDomElement(el: any): void {
@@ -77,12 +75,23 @@ export class EditorService {
     this.setCallbacks();
   }
 
-  public setBreakpointObservableSource(breakpointsIndexes$: Observable<number[]>): void {
-    breakpointsIndexes$.subscribe({ next: breakpoints => this.refreshBreakpointHighlight(breakpoints) });
+  public setBreakpointsSource(breakpointsIndexes$: Observable<number[]>): void {
+    this.breakpointsSub = breakpointsIndexes$.subscribe({
+      next: breakpoints => this.refreshBreakpointHighlight(breakpoints)
+    });
   }
 
-  public setExecutionPosObservableSource(executionPos$: Observable<number>): void {
-    executionPos$.subscribe({ next: pos => this.refreshExecutionPosHighlight(pos) });
+  public setExecutionPosSource(executionPos$: Observable<number>): void {
+    this.executionPosSub = executionPos$.subscribe({
+      next: pos => this.refreshExecutionPosHighlight(pos)
+    });
+  }
+
+  public onDestroy(): void {
+    this.breakpointsSub.unsubscribe();
+    this.executionPosSub.unsubscribe();
+    this.onCodeChangeSubj.complete();
+    this.onCursorPosChangeSubj.complete();
   }
 
   private refreshExecutionPosHighlight(posIndex: number): void {
@@ -91,7 +100,7 @@ export class EditorService {
       return;
     }
     const executionRange = this.getOneLetterRange(posIndex);
-    this.executionHighlightId = this.session.addMarker(executionRange, this.executionPosHighlighterClass, 'text', true);
+    this.executionHighlightId = this.session.addMarker(executionRange, BF_EXECUTION_POINT_HIGHLIGHTER_CLASS, 'text', true);
   }
 
   private refreshBreakpointHighlight(breakpointsIndexes: number[]): void {
@@ -105,7 +114,7 @@ export class EditorService {
 
   private highlightBreakpoint(breakpointIndex: number): EditorBreakpoint {
     const breakpointRange = this.getOneLetterRange(breakpointIndex);
-    const id = this.session.addMarker(breakpointRange, this.breakpointHighlighterClass, 'text', true);
+    const id = this.session.addMarker(breakpointRange, BF_BREAKPOINT_HIGHLIGHTER_CLASS, 'text', true);
     const editorBreakpoint: EditorBreakpoint = {
       index: breakpointIndex,
       id
@@ -121,7 +130,7 @@ export class EditorService {
   }
 
   private setCallbacks(): void {
-    this.editor.on('change', () => this.onChangeSubj.next(this.session.getValue()));
+    this.editor.on('change', () => this.onCodeChangeSubj.next(this.session.getValue()));
     this.selection.on('changeCursor', () => this.onCursorPosChangeSubj.next(this.currentCursorPosToDocIndex()));
   }
 

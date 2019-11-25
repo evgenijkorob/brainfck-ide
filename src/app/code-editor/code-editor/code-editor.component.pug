@@ -1,1 +1,7 @@
-.code-editor(appEditor)
+.code-editor(
+  appEditor,
+  [breakpoints]='breakpointsSource$',
+  [executionPosIndex]='executionPosSource$',
+  (codeChange)='onCodeChange($event)',
+  (cursorIndexChange)='onCursorIndexChange($event)'
+)
