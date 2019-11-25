@@ -4,9 +4,11 @@ input(
   (blur)='finishInterpreterInputEditing(interpreter_input.value)'
 )
 
+span Release
 button((click)='clickOnReleaseExecutionControlButton()')
   app-icon([icon]='releaseExecutionControlIcon')
 
+span Debug
 button((click)='clickOnDebugExecutionControlButton()')
   app-icon([icon]='debugExecutionControlIcon')
 
